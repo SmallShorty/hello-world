@@ -4,35 +4,42 @@ import './styles/LogoBounce.css';
 export const LogoBounce = () => {
     const logoRef = useRef(null);
     const bodyRef = useRef(null);
-    const [hRange, setHRange] = useState(0);
-    const [wRange, setWRange] = useState(0);
-    const [positionX, setPositionX] = useState(1);
-    const [positionY, setPositionY] = useState(1);
-
-    useEffect(() => {
-        if (logoRef.current) {
-            const { height, width } = logoRef.current.getBoundingClientRect();
-            setHRange(height);
-            setWRange(width);
-        }
-    }, []);
+    const [speed,setSpeed] = useState(0.1);
+    const [positionX, setPositionX] = useState(0);
+    const [positionY, setPositionY] = useState(0);
+    const [bounces,setBounces]=useState(0);
+    const [bounceColor,setBounceColor]=useState('#66CCCC')
 
     useEffect(() => {
         let animationFrameId;
+        let b;
 
-        let bodyPosition = null;
-        let bodySize = null;
+        let wRange = null;
+        let hRange = null;
 
-        let logoPosition = null;
-        let logoSize = null;
+        let colors = [
+            "#66CCCC",
+            "#67DAC4",
+            "#7BE6B3",
+            "#9EEF9D",
+            "#C9F685",
+            "#F9F871"
+        ];
 
         const animate = () => {
-            bodyPosition = bodyRef.current.getBoundingClientRect().left;
-            bodySize = bodyRef.current.offsetWidth;
+            wRange = bodyRef.current.offsetWidth - logoRef.current.offsetWidth;
+            hRange = bodyRef.current.offsetHeight - logoRef.current.offsetHeight;
 
+            const time = performance.now() * speed;
 
+            setPositionX(positionX => Math.abs((time % (wRange*2)) - wRange ));
+            setPositionY(positionY => Math.abs((time % (hRange*2)) - hRange ));
 
-            setPositionX(positionX => positionX + 1);
+            b = Math.floor(time/hRange)+Math.floor(time/wRange);
+
+            setBounces(b);
+            setBounceColor(colors[b % colors.length]);
+
 
             animationFrameId = requestAnimationFrame(animate);
         };
@@ -42,11 +49,11 @@ export const LogoBounce = () => {
         return () => {
             cancelAnimationFrame(animationFrameId);
         };
-    }, [wRange]);
+    }, []);
 
     useEffect(() => {
-        console.log(positionX); // This will log the updated value of positionX
-    }, [positionX]);
+        console.log(bounceColor); // This will log the updated value of positionX
+    }, [bounceColor]);
 
     return (
         <div className="snippet">
@@ -54,7 +61,7 @@ export const LogoBounce = () => {
                 <p>react</p>
             </div>
             <div className="body" ref={bodyRef}>
-                <span ref={logoRef} className="logo" style={{ position: 'relative', left: positionX, top: positionY }}>{"<@hello-world/>"}</span>
+                <span ref={logoRef} className="logo" style={{ color: bounceColor ,position: 'relative', left: positionX, top: positionY }}>{"<@hello-world/>"}</span>
             </div>
         </div>
     );
